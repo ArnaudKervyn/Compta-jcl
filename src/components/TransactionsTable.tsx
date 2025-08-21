@@ -126,20 +126,20 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
         <button onClick={exportCsv} className="btn-ghost">Exporter CSV</button>
       </div>
 
-      {/* Table scrollable, plus d’air + lignes séparatrices + zébrage */}
-      <div className="overflow-auto max-h-[70vh] rounded-xl border border-zinc-200 shadow-sm bg-white">
+      {/* Professional transaction table with enhanced spacing and clear dividers */}
+      <div className="overflow-auto max-h-[75vh] rounded-xl border border-zinc-200 shadow-lg bg-white">
         <table className="min-w-full text-[15px] leading-relaxed">
-          <thead className="sticky top-0 bg-white/95 backdrop-blur z-10 shadow-sm">
-            <tr className="text-zinc-700">
-              <th className="text-left p-5">Date</th>
-              <th className="text-left p-5">Description</th>
-              <th className="text-right p-5">Montant</th>
-              <th className="text-left p-5">Catégorie</th>
-              <th className="text-left p-5">Sous-catégorie</th>
-              <th className="text-left p-5">Actions</th>
+          <thead className="sticky top-0 bg-gradient-to-r from-slate-50 to-slate-100 backdrop-blur z-10 border-b-2 border-slate-200">
+            <tr className="text-slate-700">
+              <th className="text-left px-6 py-4 font-semibold">Date</th>
+              <th className="text-left px-6 py-4 font-semibold">Description</th>
+              <th className="text-right px-6 py-4 font-semibold">Montant</th>
+              <th className="text-left px-6 py-4 font-semibold">Catégorie</th>
+              <th className="text-left px-6 py-4 font-semibold">Sous-catégorie</th>
+              <th className="text-left px-6 py-4 font-semibold">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-200">
             {filtered.map((t, idx) => {
               const isIncome = t.amount > 0.000001;
               const expenseSubs = t.category ? (categories[t.category] || []) : [];
@@ -148,20 +148,22 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
 
               return (
                 <React.Fragment key={t.id}>
-                  <tr className={`align-top border-t border-zinc-200 ${idx % 2 === 0 ? "bg-white" : "bg-zinc-50/60"}`}>
-                    <td className="p-5 whitespace-nowrap">{t.date}</td>
-                    <td className="p-5">
-                      <div className="font-medium">{t.description}</div>
-                      <div className="text-xs text-zinc-500 mt-1">
+                  <tr className={`align-top transition-colors hover:bg-slate-50/80 ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/30"}`}>
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <div className="text-slate-900 font-medium">{t.date}</div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="font-semibold text-slate-900">{t.description}</div>
+                      <div className="text-sm text-slate-500 mt-1">
                         {t.counterparty || ""} {t.movementId ? `· ${t.movementId}` : ""}
                       </div>
                     </td>
-                    <td className={`p-5 text-right tabular-nums font-semibold ${isIncome ? "text-emerald-700" : "text-rose-700"}`}>
-                      {t.amount.toFixed(2)}
+                    <td className={`px-6 py-5 text-right tabular-nums font-bold text-lg ${isIncome ? "text-emerald-600" : "text-rose-600"}`}>
+                      €{t.amount.toFixed(2)}
                     </td>
 
                     {/* Catégorie */}
-                    <td className="p-5">
+                    <td className="px-6 py-5">
                       {!isIncome ? (
                         hasSplits ? (
                           <div className="text-xs text-zinc-600">Opération éclatée ({t.splits!.length} lignes)</div>
@@ -224,13 +226,13 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
                     </td>
 
                     {/* Sous-catégorie */}
-                    <td className="p-5">
+                    <td className="px-6 py-5">
                       {!isIncome ? (
                         hasSplits ? (
-                          <div className="text-xs text-zinc-600">—</div>
+                          <div className="text-sm text-slate-500 font-medium">—</div>
                         ) : (
                           <select
-                            className="select"
+                            className="select text-sm"
                             value={t.subcategory || ""}
                             onChange={e => setExpenseSub(t.id, e.target.value)}
                             disabled={!t.category || expenseSubs.length === 0}
@@ -240,12 +242,12 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
                           </select>
                         )
                       ) : (
-                        <input className="input opacity-40" readOnly placeholder="—" />
+                        <div className="text-sm text-slate-400 font-medium">—</div>
                       )}
                     </td>
 
                     {/* Actions */}
-                    <td className="p-5">
+                    <td className="px-6 py-5">
                       {!isIncome && (
                         <button className="btn-ghost" onClick={() => openSplit(t)}>Éclater</button>
                       )}
