@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Thème clair de base --- */
+:root {
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --text: #0f172a;
+  --muted: #6b7280;
+  --ring: rgba(99, 102, 241, 0.15);  /* indigo 500/15 */
+  --primary-600: #4f46e5;
+  --primary-500: #6366f1;
+  --danger-600: #e11d48;
+  --danger-500: #f43f5e;
+}
+
+html, body {
+  background: #f8fafc; /* gris très clair */
+  color: var(--text);
+}
+
+/* --- Composants utilitaires (sans @apply) --- */
+.card {
+  border-radius: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: #f8fafc;
+  border: 1px solid var(--card-border);
+  font-size: 0.875rem;
+}
+
+/* Boutons (base commune) */
+.btn, .btn-ghost, .btn-primary, .btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  background: #fff;
+  color: #111827;
+  transition: box-shadow 0.2s, transform 0.05s;
+}
+.btn:hover, .btn-ghost:hover, .btn-primary:hover, .btn-danger:hover {
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+}
+.btn:active, .btn-ghost:active, .btn-primary:active, .btn-danger:active {
+  transform: translateY(1px);
+}
+
+/* Variantes */
+.btn-ghost { /* idem base */ }
+
+.btn-primary {
+  border-color: var(--primary-600);
+  background: var(--primary-600);
+  color: #fff;
+}
+.btn-primary:hover {
+  border-color: var(--primary-500);
+  background: var(--primary-500);
+}
+
+.btn-danger {
+  border-color: var(--danger-600);
+  background: var(--danger-600);
+  color: #fff;
+}
+.btn-danger:hover {
+  border-color: var(--danger-500);
+  background: var(--danger-500);
+}
+
+/* Inputs */
+.input, .select {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 0.5rem 0.75rem;
+  color: #111827;
+}
+.input::placeholder { color: #9ca3af; }
+.input:focus, .select:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring);
+  border-color: #6366f1;
+}
+
+/* --- Police globale et héritage --- */
+:root { --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+
+
+/* police par défaut pour toute la page */
+html, body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* très important: les contrôles héritent la police */
+button, input, select, textarea {
+  font: inherit; /* hérite family, size, weight, etc. */
+}
+
+/* chiffres alignés pour les montants */
+.tabular-nums { font-variant-numeric: tabular-nums; }
