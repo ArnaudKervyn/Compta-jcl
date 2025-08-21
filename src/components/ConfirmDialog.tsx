@@ -1,4 +1,4 @@
-import React from "react";
+// no React import needed with React 17+ JSX transform
 
 type Props = {
   open: boolean;

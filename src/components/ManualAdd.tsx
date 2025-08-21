@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import type { Transaction } from "../types";
 import incomeCategories from "../data/incomes.json";
 import rawCategories from "../data/categories.json";
@@ -13,23 +13,22 @@ const todayISO = () => new Date().toISOString().slice(0, 10);
 const moneyRe = /^-?\d+([.,]\d{1,2})?$/;
 
 export default function ManualAdd({ onCreate }: Props) {
-  const [date, setDate] = React.useState(todayISO());
-  const [desc, setDesc] = React.useState("");
-  const [sign, setSign] = React.useState<"expense" | "income">("expense");
-  const [amount, setAmount] = React.useState("");
+  const [date, setDate] = useState(todayISO());
+  const [desc, setDesc] = useState("");
+  const [sign, setSign] = useState<"expense" | "income">("expense");
+  const [amount, setAmount] = useState("");
 
   // Dépense
-  const [cat, setCat] = React.useState("");
-  const [sub, setSub] = React.useState("");
+  const [cat, setCat] = useState("");
+  const [sub, setSub] = useState("");
 
   // Rentrée (revenu) ou remboursement
-  const [incomeCat, setIncomeCat] = React.useState("");
-  const [isRefund, setIsRefund] = React.useState(false);
-  const [refundCat, setRefundCat] = React.useState("");
-  const [refundSub, setRefundSub] = React.useState("");
+  const [incomeCat, setIncomeCat] = useState("");
+  const [isRefund, setIsRefund] = useState(false);
+  const [refundCat, setRefundCat] = useState("");
+  const [refundSub, setRefundSub] = useState("");
 
-  const subs = cat ? (CATS[cat] || []) : [];
-  const refundSubs = refundCat ? (CATS[refundCat] || []) : [];
+  // computed in JSX directly
 
   function parseAmount(a: string): number {
     return parseFloat(a.replace(/\./g, "").replace(",", "."));

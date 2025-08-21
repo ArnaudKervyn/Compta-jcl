@@ -99,7 +99,7 @@ export default function Overview({ transactions }: Props) {
     label, left, right, strong,
     zebraIndex,
   }: { label: string; left?: string; right?: string; strong?: boolean; zebraIndex?: number }) => (
-    <div className={`grid grid-cols-3 items-center px-4 py-3 ${zebraIndex! % 2 === 0 ? "bg-white" : "bg-zinc-50/60"} border-t border-zinc-100`}>
+    <div className={`grid grid-cols-3 items-center px-5 py-3.5 ${zebraIndex! % 2 === 0 ? "bg-white" : "bg-zinc-50/60"} border-t last:border-b border-zinc-100`}>
       <div className={strong ? "font-semibold" : "font-medium"}>{label}</div>
       <div className="text-right tabular-nums">{left || ""}</div>
       <div className="text-right tabular-nums">{right || ""}</div>
@@ -112,7 +112,7 @@ export default function Overview({ transactions }: Props) {
       sky: "bg-sky-600 text-white",
       emerald: "bg-emerald-600 text-white",
     };
-    return <div className={`px-4 py-2 text-sm font-semibold uppercase tracking-wide ${map[color]}`}>{children}</div>;
+    return <div className={`px-5 py-2 text-sm font-semibold uppercase tracking-wide ${map[color]}`}>{children}</div>;
   };
 
   const SubTitle = ({ color, children }: { color: "indigo" | "sky"; children: React.ReactNode }) => {
@@ -120,7 +120,7 @@ export default function Overview({ transactions }: Props) {
       indigo: "bg-indigo-50 text-indigo-700",
       sky: "bg-sky-50 text-sky-700",
     };
-    return <div className={`px-4 py-2 text-sm font-semibold ${map[color]} border-t border-zinc-200`}>{children}</div>;
+    return <div className={`px-5 py-2 text-sm font-semibold ${map[color]} border-t border-zinc-200`}>{children}</div>;
   };
 
   // Cartes de stats
@@ -154,7 +154,7 @@ export default function Overview({ transactions }: Props) {
 
         <SubTitle color="indigo">Operating income</SubTitle>
         <div>
-          <div className="grid grid-cols-3 text-xs text-zinc-600 px-4 pt-3 pb-2">
+          <div className="grid grid-cols-3 text-xs text-zinc-600 px-5 pt-3 pb-2">
             <div>Catégorie</div><div className="text-right">Réel HTVA</div><div className="text-right">Réel TVAC</div>
           </div>
           {OPERATING_INCOME.map((c, i) => {
@@ -162,7 +162,7 @@ export default function Overview({ transactions }: Props) {
             const htva = toHTVA(tvac);
             return <Row key={c} zebraIndex={i} label={c} left={money.format(htva)} right={money.format(tvac)} />;
           })}
-          <div className="grid grid-cols-3 items-center px-4 py-3 bg-indigo-50/60 border-t border-indigo-200 font-semibold">
+          <div className="grid grid-cols-3 items-center px-5 py-3.5 bg-indigo-50/60 border-t border-indigo-200 font-semibold">
             <div>Total operating income</div>
             <div className="text-right tabular-nums">{money.format(incomeOperatingHTVA)}</div>
             <div className="text-right tabular-nums">{money.format(incomeOperatingTVAC)}</div>
@@ -179,7 +179,7 @@ export default function Overview({ transactions }: Props) {
           {incomeTvac.autres > 0 && (
             <Row zebraIndex={999} label="Autres" left={money.format(toHTVA(incomeTvac.autres))} right={money.format(incomeTvac.autres)} />
           )}
-          <div className="grid grid-cols-3 items-center px-4 py-3 bg-indigo-50/60 border-t border-indigo-200 font-semibold">
+          <div className="grid grid-cols-3 items-center px-5 py-3.5 bg-indigo-50/60 border-t border-indigo-200 font-semibold">
             <div>Total non-operating income</div>
             <div className="text-right tabular-nums">
               {money.format(incomeNonOperatingHTVA + toHTVA(incomeTvac.autres))}
@@ -190,7 +190,7 @@ export default function Overview({ transactions }: Props) {
           </div>
         </div>
 
-        <div className="px-4 py-3 bg-indigo-600/10 text-indigo-900 border-t border-indigo-200 font-semibold grid grid-cols-3">
+        <div className="px-5 py-3.5 bg-indigo-600/10 text-indigo-900 border-t border-indigo-200 font-semibold grid grid-cols-3">
           <div>TOTAL INCOME</div>
           <div className="text-right tabular-nums">{money.format(incomeTotalHTVA)}</div>
           <div className="text-right tabular-nums">{money.format(incomeTotalTVAC)}</div>
@@ -203,13 +203,13 @@ export default function Overview({ transactions }: Props) {
 
         <SubTitle color="sky">Operating expenses (TVAC)</SubTitle>
         <div>
-          <div className="grid grid-cols-3 text-xs text-zinc-600 px-4 pt-3 pb-2">
+          <div className="grid grid-cols-3 text-xs text-zinc-600 px-5 pt-3 pb-2">
             <div>Catégorie</div><div></div><div className="text-right">Réel TVAC</div>
           </div>
           {OPERATING_EXPENSES.map((k, i) => (
             <Row key={k} zebraIndex={i} label={<span className="font-semibold">{expLabel(k)}</span> as unknown as string} right={money.format(expenseTVACByCat.get(k) || 0)} />
           ))}
-          <div className="grid grid-cols-3 items-center px-4 py-3 bg-sky-50/60 border-t border-sky-200 font-semibold">
+          <div className="grid grid-cols-3 items-center px-5 py-3.5 bg-sky-50/60 border-t border-sky-200 font-semibold">
             <div>Total operating expenses</div><div></div>
             <div className="text-right tabular-nums">{money.format(opExpTVAC)}</div>
           </div>
@@ -220,13 +220,13 @@ export default function Overview({ transactions }: Props) {
           {EXTRA_COSTS.map((k, i) => (
             <Row key={k} zebraIndex={i} label={<span className="font-semibold">{expLabel(k)}</span> as unknown as string} right={money.format(expenseTVACByCat.get(k) || 0)} />
           ))}
-          <div className="grid grid-cols-3 items-center px-4 py-3 bg-sky-50/60 border-t border-sky-200 font-semibold">
+          <div className="grid grid-cols-3 items-center px-5 py-3.5 bg-sky-50/60 border-t border-sky-200 font-semibold">
             <div>Total coûts supplémentaires</div><div></div>
             <div className="text-right tabular-nums">{money.format(extraTVAC)}</div>
           </div>
         </div>
 
-        <div className="px-4 py-3 bg-sky-600/10 text-sky-900 border-t border-sky-200 font-semibold grid grid-cols-3">
+        <div className="px-5 py-3.5 bg-sky-600/10 text-sky-900 border-t border-sky-200 font-semibold grid grid-cols-3">
           <div>TOTAL EXPENSES</div><div></div>
           <div className="text-right tabular-nums">{money.format(totalExpTVAC)}</div>
         </div>

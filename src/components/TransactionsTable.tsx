@@ -148,7 +148,7 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
 
               return (
                 <React.Fragment key={t.id}>
-                  <tr className={`align-top border-t border-zinc-200 ${idx % 2 === 0 ? "bg-white" : "bg-zinc-50/60"}`}>
+                  <tr className={`align-top border-t last:border-b border-zinc-200 ${idx % 2 === 0 ? "bg-white" : "bg-zinc-50/60"} hover:bg-zinc-50/80 transition-colors`}>
                     <td className="p-5 whitespace-nowrap">{t.date}</td>
                     <td className="p-5">
                       <div className="font-medium">{t.description}</div>
@@ -250,7 +250,7 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
                         <button className="btn-ghost" onClick={() => openSplit(t)}>Éclater</button>
                       )}
                       {hasSplits && !isIncome && (
-                        <div className="mt-3 text-xs text-zinc-600 space-y-1">
+                        <div className="mt-4 text-xs text-zinc-600 space-y-1">
                           {t.splits!.map(s => (
                             <div key={s.id}>• <span className="font-medium">{s.category}</span>{s.subcategory ? ` / ${s.subcategory}` : ""} — {s.amount.toFixed(2)} €</div>
                           ))}

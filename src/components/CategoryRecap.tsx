@@ -1,7 +1,8 @@
-import React from "react";
+import { useMemo } from "react";
 import type { Transaction } from "../types";
 import rawCategories from "../data/categories.json";
 import incomeCategories from "../data/incomes.json";
+import CategoryBadge from "./CategoryBadge";
 
 type CategoryDict = Record<string, string[]>;
 const CATS = rawCategories as CategoryDict;
@@ -125,8 +126,8 @@ function computeIncomeRows(transactions: Transaction[]): IncomeRow[] {
 }
 
 export default function CategoryRecap({ transactions }: { transactions: Transaction[] }) {
-  const expenseBlocks = React.useMemo(() => computeExpenseBlocks(transactions), [transactions]);
-  const incomeRows = React.useMemo(() => computeIncomeRows(transactions), [transactions]);
+  const expenseBlocks = useMemo(() => computeExpenseBlocks(transactions), [transactions]);
+  const incomeRows = useMemo(() => computeIncomeRows(transactions), [transactions]);
 
   function exportExpensesCsv() {
     const rows: Array<Record<string, string | number>> = [];
@@ -147,9 +148,10 @@ export default function CategoryRecap({ transactions }: { transactions: Transact
   }
 
   function exportIncomesCsv() {
-    const header = ["Catégorie", "Total (€)", "Nb. lignes"];
-    const rows = incomeRows.map(r => ({ Catégorie: r.category, "Total (€)": Number(r.total.toFixed(2)), "Nb. lignes": r.count }));
-    const csv = [header.join(";"), ...rows.map(r => header.map(h => String(r[h] ?? "")).join(";"))].join("\n");
+    const header = ["Catégorie", "Total (€)", "Nb. lignes"] as const;
+    type Row = { Catégorie: string; "Total (€)": number; "Nb. lignes": number };
+    const rows: Row[] = incomeRows.map(r => ({ Catégorie: r.category, "Total (€)": Number(r.total.toFixed(2)), "Nb. lignes": r.count }));
+    const csv = [header.join(";"), ...rows.map(r => header.map(h => String(r[h])).join(";"))].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -162,6 +164,21 @@ export default function CategoryRecap({ transactions }: { transactions: Transact
 
   return (
     <div className="space-y-8">
+      {/* Aperçu global */}
+      <div className="grid sm:grid-cols-3 gap-4">
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+          <div className="text-sm font-semibold text-indigo-800">Rentrées</div>
+          <div className="mt-1 text-2xl font-bold text-indigo-900 tabular-nums">{money.format(totalIncomes)}</div>
+        </div>
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
+          <div className="text-sm font-semibold text-rose-800">Dépenses nettes</div>
+          <div className="mt-1 text-2xl font-bold text-rose-900 tabular-nums">{money.format(totalExpenses)}</div>
+        </div>
+        <div className={`rounded-xl border p-4 ${totalIncomes - totalExpenses >= 0 ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50"}`}>
+          <div className={`text-sm font-semibold ${totalIncomes - totalExpenses >= 0 ? "text-emerald-800" : "text-rose-800"}`}>Net</div>
+          <div className={`mt-1 text-2xl font-bold tabular-nums ${totalIncomes - totalExpenses >= 0 ? "text-emerald-900" : "text-rose-900"}`}>{money.format(totalIncomes - totalExpenses)}</div>
+        </div>
+      </div>
       {/* Dépenses */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Récap dépenses (toutes catégories, remboursements déduits)</h3>
@@ -172,7 +189,9 @@ export default function CategoryRecap({ transactions }: { transactions: Transact
         {expenseBlocks.map(b => (
           <div key={b.jsonKey} className="card overflow-hidden">
             <div className="px-4 py-3 bg-zinc-50 flex items-center justify-between">
-              <div className="font-semibold">{b.title}</div>
+              <div className="flex items-center gap-2">
+                <CategoryBadge name={b.title} />
+              </div>
               <div className="text-sm text-zinc-600">
                 Total net : <span className="font-medium">{money.format(b.total)}</span>
                 {b.toClassify > 0 && <span className="ml-3 text-amber-700">À catégoriser : {money.format(b.toClassify)}</span>}
@@ -181,21 +200,21 @@ export default function CategoryRecap({ transactions }: { transactions: Transact
             <table className="min-w-full text-sm">
               <thead className="bg-zinc-50">
                 <tr>
-                  <th className="text-left p-3">Sous-catégorie</th>
-                  <th className="text-right p-3">Total</th>
-                  <th className="text-right p-3">Nb.</th>
+                  <th className="text-left p-3.5">Sous-catégorie</th>
+                  <th className="text-right p-3.5">Total</th>
+                  <th className="text-right p-3.5">Nb.</th>
                 </tr>
               </thead>
               <tbody>
                 {b.rows.map(r => (
                   <tr key={r.subcategory} className="border-t border-zinc-200">
-                    <td className="p-3">{r.subcategory}</td>
-                    <td className={`p-3 text-right tabular-nums ${r.total < 0 ? "text-emerald-700" : ""}`}>{money.format(r.total)}</td>
-                    <td className="p-3 text-right tabular-nums">{r.count}</td>
+                    <td className="p-3.5">{r.subcategory}</td>
+                    <td className={`p-3.5 text-right tabular-nums ${r.total < 0 ? "text-emerald-700" : ""}`}>{money.format(r.total)}</td>
+                    <td className="p-3.5 text-right tabular-nums">{r.count}</td>
                   </tr>
                 ))}
                 {b.rows.length === 0 && (
-                  <tr><td className="p-3 text-zinc-600" colSpan={3}>Aucune dépense pour l’instant.</td></tr>
+                  <tr><td className="p-3.5 text-zinc-600" colSpan={3}>Aucune dépense pour l’instant.</td></tr>
                 )}
               </tbody>
             </table>
@@ -215,25 +234,27 @@ export default function CategoryRecap({ transactions }: { transactions: Transact
         <table className="min-w-full text-sm">
           <thead className="bg-zinc-50">
             <tr>
-              <th className="text-left p-3">Catégorie</th>
-              <th className="text-right p-3">Total</th>
-              <th className="text-right p-3">Nb.</th>
+              <th className="text-left p-3.5">Catégorie</th>
+              <th className="text-right p-3.5">Total</th>
+              <th className="text-right p-3.5">Nb.</th>
             </tr>
           </thead>
           <tbody>
             {incomeRows.map(r => (
               <tr key={r.category} className="border-t border-zinc-200">
-                <td className="p-3">{r.category}</td>
-                <td className="p-3 text-right tabular-nums">{money.format(r.total)}</td>
-                <td className="p-3 text-right tabular-nums">{r.count}</td>
+                <td className="p-3.5">
+                  <CategoryBadge name={r.category} />
+                </td>
+                <td className="p-3.5 text-right tabular-nums">{money.format(r.total)}</td>
+                <td className="p-3.5 text-right tabular-nums">{r.count}</td>
               </tr>
             ))}
           </tbody>
           <tfoot>
             <tr className="bg-zinc-50 border-t border-zinc-200">
-              <td className="p-3 font-semibold text-right">Total</td>
-              <td className="p-3 text-right font-semibold">{money.format(totalIncomes)}</td>
-              <td className="p-3 text-right font-semibold">
+              <td className="p-3.5 font-semibold text-right">Total</td>
+              <td className="p-3.5 text-right font-semibold">{money.format(totalIncomes)}</td>
+              <td className="p-3.5 text-right font-semibold">
                 {incomeRows.reduce((s, r) => s + r.count, 0)}
               </td>
             </tr>

@@ -7,7 +7,7 @@ import ConfirmDialog from "./components/ConfirmDialog";
 import PeriodFilter, { type Period } from "./components/PeriodFilter";
 import CollapsibleCard from "./components/CollapsibleCard";
 import Overview from "./components/Overview";
-import { guessMapping, normalizeAll } from "./lib/ing";
+import { normalizeAll } from "./lib/ing";
 import { db } from "./db";
 import { dedupeInDB } from "./lib/dedupe";
 import type { RawRow, MappedColumns, Transaction } from "./types";
@@ -24,7 +24,7 @@ export default function App() {
   // import & mapping
   const [rawRows, setRawRows] = React.useState<RawRow[]>([]);
   const [headers, setHeaders] = React.useState<string[]>([]);
-  const [mapping, setMapping] = React.useState<MappedColumns | null>(null);
+  // mapping is ephemeral; no need to keep in state
 
   // data
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
@@ -94,13 +94,11 @@ export default function App() {
     if (!rows.length) return;
     setRawRows(rows);
     setHeaders(hdrs);
-    setMapping(guessMapping(hdrs));
     setStep("map");
     setView("table");
   }
 
   async function onMappingSubmit(m: MappedColumns) {
-    setMapping(m);
     const tx = normalizeAll(rawRows, m);
 
     // merge avec existant pour préserver catégories/remboursements/splits
@@ -114,7 +112,8 @@ export default function App() {
       if (prev.isRefund && !tx[i].isRefund) tx[i].isRefund = prev.isRefund;
       if (prev.refundCategory && !tx[i].refundCategory) tx[i].refundCategory = prev.refundCategory;
       if (prev.refundSubcategory && !tx[i].refundSubcategory) tx[i].refundSubcategory = prev.refundSubcategory;
-      if (prev.splits && (!tx[i].splits || tx[i].splits.length === 0)) tx[i].splits = prev.splits;
+      const hasNoSplits = !tx[i].splits || tx[i].splits!.length === 0;
+      if (prev.splits && hasNoSplits) tx[i].splits = prev.splits;
     }
 
     await db.transactions.bulkPut(tx);
