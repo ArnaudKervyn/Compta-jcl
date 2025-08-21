@@ -1,6 +1,7 @@
 import React from "react";
 import type { Transaction } from "../types";
 import incomeCategories from "../data/incomes.json";
+import CategoryBadge from "./CategoryBadge";
 
 const INCOME_LIST = incomeCategories as string[]; // ["MBU","SBU","EBU","QBU","BSBG(+)","Formations","Partenariats"]
 const money = new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR" });
@@ -96,11 +97,28 @@ export default function Overview({ transactions }: Props) {
 
   // UI helpers
   const Row = ({
-    label, left, right, strong,
+    label,
+    left,
+    right,
+    strong,
     zebraIndex,
-  }: { label: string; left?: string; right?: string; strong?: boolean; zebraIndex?: number }) => (
+    badge,
+  }: {
+    label: string;
+    left?: string;
+    right?: string;
+    strong?: boolean;
+    zebraIndex?: number;
+    badge?: boolean;
+  }) => (
     <div className={`grid grid-cols-3 items-center px-4 py-3 ${zebraIndex! % 2 === 0 ? "bg-white" : "bg-zinc-50/60"} border-t border-zinc-100`}>
-      <div className={strong ? "font-semibold" : "font-medium"}>{label}</div>
+      <div className="flex items-center gap-2">
+        {badge ? (
+          <CategoryBadge name={label} />
+        ) : (
+          <span className={strong ? "font-semibold" : "font-medium"}>{label}</span>
+        )}
+      </div>
       <div className="text-right tabular-nums">{left || ""}</div>
       <div className="text-right tabular-nums">{right || ""}</div>
     </div>
@@ -160,7 +178,7 @@ export default function Overview({ transactions }: Props) {
           {OPERATING_INCOME.map((c, i) => {
             const tvac = incomeTvac.map.get(c) || 0;
             const htva = toHTVA(tvac);
-            return <Row key={c} zebraIndex={i} label={c} left={money.format(htva)} right={money.format(tvac)} />;
+            return <Row key={c} zebraIndex={i} label={c} left={money.format(htva)} right={money.format(tvac)} badge />;
           })}
           <div className="grid grid-cols-3 items-center px-4 py-3 bg-indigo-50/60 border-t border-indigo-200 font-semibold">
             <div>Total operating income</div>
@@ -174,10 +192,10 @@ export default function Overview({ transactions }: Props) {
           {NON_OPERATING_INCOME.map((c, i) => {
             const tvac = incomeTvac.map.get(c) || 0;
             const htva = toHTVA(tvac);
-            return <Row key={c} zebraIndex={i} label={c} left={money.format(htva)} right={money.format(tvac)} />;
+            return <Row key={c} zebraIndex={i} label={c} left={money.format(htva)} right={money.format(tvac)} badge />;
           })}
           {incomeTvac.autres > 0 && (
-            <Row zebraIndex={999} label="Autres" left={money.format(toHTVA(incomeTvac.autres))} right={money.format(incomeTvac.autres)} />
+            <Row zebraIndex={999} label="Autres" left={money.format(toHTVA(incomeTvac.autres))} right={money.format(incomeTvac.autres)} badge />
           )}
           <div className="grid grid-cols-3 items-center px-4 py-3 bg-indigo-50/60 border-t border-indigo-200 font-semibold">
             <div>Total non-operating income</div>
@@ -207,7 +225,7 @@ export default function Overview({ transactions }: Props) {
             <div>Catégorie</div><div></div><div className="text-right">Réel TVAC</div>
           </div>
           {OPERATING_EXPENSES.map((k, i) => (
-            <Row key={k} zebraIndex={i} label={<span className="font-semibold">{expLabel(k)}</span> as unknown as string} right={money.format(expenseTVACByCat.get(k) || 0)} />
+            <Row key={k} zebraIndex={i} label={expLabel(k)} right={money.format(expenseTVACByCat.get(k) || 0)} badge />
           ))}
           <div className="grid grid-cols-3 items-center px-4 py-3 bg-sky-50/60 border-t border-sky-200 font-semibold">
             <div>Total operating expenses</div><div></div>
@@ -218,7 +236,7 @@ export default function Overview({ transactions }: Props) {
         <SubTitle color="sky">Coûts supplémentaires (TVAC)</SubTitle>
         <div>
           {EXTRA_COSTS.map((k, i) => (
-            <Row key={k} zebraIndex={i} label={<span className="font-semibold">{expLabel(k)}</span> as unknown as string} right={money.format(expenseTVACByCat.get(k) || 0)} />
+            <Row key={k} zebraIndex={i} label={expLabel(k)} right={money.format(expenseTVACByCat.get(k) || 0)} badge />
           ))}
           <div className="grid grid-cols-3 items-center px-4 py-3 bg-sky-50/60 border-t border-sky-200 font-semibold">
             <div>Total coûts supplémentaires</div><div></div>

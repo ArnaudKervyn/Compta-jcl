@@ -28,8 +28,6 @@ export default function ManualAdd({ onCreate }: Props) {
   const [refundCat, setRefundCat] = React.useState("");
   const [refundSub, setRefundSub] = React.useState("");
 
-  const subs = cat ? (CATS[cat] || []) : [];
-  const refundSubs = refundCat ? (CATS[refundCat] || []) : [];
 
   function parseAmount(a: string): number {
     return parseFloat(a.replace(/\./g, "").replace(",", "."));

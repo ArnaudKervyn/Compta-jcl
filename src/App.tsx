@@ -24,7 +24,7 @@ export default function App() {
   // import & mapping
   const [rawRows, setRawRows] = React.useState<RawRow[]>([]);
   const [headers, setHeaders] = React.useState<string[]>([]);
-  const [mapping, setMapping] = React.useState<MappedColumns | null>(null);
+  const [, setMapping] = React.useState<MappedColumns | null>(null);
 
   // data
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
@@ -114,7 +114,9 @@ export default function App() {
       if (prev.isRefund && !tx[i].isRefund) tx[i].isRefund = prev.isRefund;
       if (prev.refundCategory && !tx[i].refundCategory) tx[i].refundCategory = prev.refundCategory;
       if (prev.refundSubcategory && !tx[i].refundSubcategory) tx[i].refundSubcategory = prev.refundSubcategory;
-      if (prev.splits && (!tx[i].splits || tx[i].splits.length === 0)) tx[i].splits = prev.splits;
+      const prevSplitsCount = prev.splits?.length ?? 0;
+      const nextSplitsCount = tx[i].splits?.length ?? 0;
+      if (prevSplitsCount > 0 && nextSplitsCount === 0) tx[i].splits = prev.splits;
     }
 
     await db.transactions.bulkPut(tx);

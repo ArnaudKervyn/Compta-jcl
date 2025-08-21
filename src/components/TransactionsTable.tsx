@@ -4,6 +4,7 @@ import type { Transaction, Split } from "../types";
 import rawCategories from "../data/categories.json";
 import incomeCategories from "../data/incomes.json";
 import SplitEditor from "./SplitEditor";
+import CategoryBadge from "./CategoryBadge";
 
 type CategoryDict = Record<string, string[]>;
 const categories = rawCategories as CategoryDict;
@@ -148,7 +149,7 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
 
               return (
                 <React.Fragment key={t.id}>
-                  <tr className={`align-top border-t border-zinc-200 ${idx % 2 === 0 ? "bg-white" : "bg-zinc-50/60"}`}>
+                  <tr className={`align-top border-t border-zinc-200 transition-colors ${idx % 2 === 0 ? "bg-white" : "bg-zinc-50/60"} hover:bg-zinc-100/60`}>
                     <td className="p-5 whitespace-nowrap">{t.date}</td>
                     <td className="p-5">
                       <div className="font-medium">{t.description}</div>
@@ -252,7 +253,11 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
                       {hasSplits && !isIncome && (
                         <div className="mt-3 text-xs text-zinc-600 space-y-1">
                           {t.splits!.map(s => (
-                            <div key={s.id}>• <span className="font-medium">{s.category}</span>{s.subcategory ? ` / ${s.subcategory}` : ""} — {s.amount.toFixed(2)} €</div>
+                            <div key={s.id} className="flex items-center gap-2">
+                              <CategoryBadge name={s.category} />
+                              <span className="text-zinc-500">{s.subcategory ? ` / ${s.subcategory}` : ""}</span>
+                              <span className="tabular-nums">— {s.amount.toFixed(2)} €</span>
+                            </div>
                           ))}
                         </div>
                       )}
