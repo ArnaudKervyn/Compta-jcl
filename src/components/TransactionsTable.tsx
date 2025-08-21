@@ -10,7 +10,7 @@ const categories = rawCategories as CategoryDict;
 const incomes = incomeCategories as string[];
 
 type Props = {
-  transactions: Transaction[];
+  transactions: Transaction[];        // (déjà filtrées par période côté App)
   onUpdate: (rows: Transaction[]) => void;
 };
 
@@ -22,22 +22,33 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
     onUpdate(transactions.map(t => (t.id === id ? { ...t, ...up } : t)));
   }
 
+  // Dépense
   function setExpenseCat(id: string, category: string) { patch(id, { category, subcategory: "" }); }
   function setExpenseSub(id: string, subcategory: string) { patch(id, { subcategory }); }
+
+  // Rentrée
   function setIncomeCat(id: string, category: string) { patch(id, { category }); }
 
+  // Remboursement
   function toggleRefund(id: string, isRefund: boolean) {
-    patch(id, { isRefund, ...(isRefund ? { category: "", refundCategory: "", refundSubcategory: "" } : { refundCategory: "", refundSubcategory: "" }) });
+    patch(id, {
+      isRefund,
+      ...(isRefund
+        ? { category: "", refundCategory: "", refundSubcategory: "" }
+        : { refundCategory: "", refundSubcategory: "" })
+    });
   }
   function setRefundCat(id: string, refundCategory: string) { patch(id, { refundCategory, refundSubcategory: "" }); }
   function setRefundSub(id: string, refundSubcategory: string) { patch(id, { refundSubcategory }); }
 
+  // Split
   function openSplit(tx: Transaction) { setEditingSplitId(tx.id); }
   function saveSplit(id: string, splits: Split[]) {
     patch(id, { splits, category: "", subcategory: "" });
     setEditingSplitId(null);
   }
 
+  // Export CSV (affiche les splits en lignes individuelles)
   function exportCsv() {
     const rows: any[] = [];
     for (const t of transactions) {
@@ -82,6 +93,7 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
     URL.revokeObjectURL(url);
   }
 
+  // Filtre texte local
   const filtered = transactions.filter(t => {
     if (!filter.trim()) return true;
     const s = filter.toLowerCase();
@@ -95,60 +107,70 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
     );
   });
 
+  // Compteur "catégorisées"
+  const categorizedCount = transactions.filter(t =>
+    t.category || t.isRefund || (t.splits && t.splits.length > 0)
+  ).length;
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
+      {/* Barre d’actions */}
+      <div className="flex flex-wrap gap-3 items-center justify-between">
         <input
           value={filter}
           onChange={e => setFilter(e.target.value)}
           placeholder="Filtrer… (texte, catégorie, sous-catégorie)"
-          className="input"
+          className="input w-full md:w-[420px]"
         />
-        <div className="text-sm text-zinc-600">
-          {transactions.filter(t => t.category || t.isRefund || (t.splits && t.splits.length > 0)).length} / {transactions.length} catégorisées
-        </div>
+        <div className="text-sm text-zinc-600">{categorizedCount} / {transactions.length} catégorisées</div>
         <button onClick={exportCsv} className="btn-ghost">Exporter CSV</button>
       </div>
 
-      <div className="overflow-auto">
-        <table className="min-w-full text-sm">
-          <thead className="bg-zinc-50">
-            <tr>
-              <th className="text-left p-3">Date</th>
-              <th className="text-left p-3">Description</th>
-              <th className="text-right p-3">Montant</th>
-              <th className="text-left p-3">Catégorie</th>
-              <th className="text-left p-3">Sous-catégorie</th>
-              <th className="text-left p-3">Actions</th>
+      {/* Table scrollable, plus d’air + lignes séparatrices + zébrage */}
+      <div className="overflow-auto max-h-[70vh] rounded-xl border border-zinc-200 shadow-sm bg-white">
+        <table className="min-w-full text-[15px] leading-relaxed">
+          <thead className="sticky top-0 bg-white/95 backdrop-blur z-10 shadow-sm">
+            <tr className="text-zinc-700">
+              <th className="text-left p-5">Date</th>
+              <th className="text-left p-5">Description</th>
+              <th className="text-right p-5">Montant</th>
+              <th className="text-left p-5">Catégorie</th>
+              <th className="text-left p-5">Sous-catégorie</th>
+              <th className="text-left p-5">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map(t => {
+            {filtered.map((t, idx) => {
               const isIncome = t.amount > 0.000001;
               const expenseSubs = t.category ? (categories[t.category] || []) : [];
               const refundSubs = t.refundCategory ? (categories[t.refundCategory] || []) : [];
               const hasSplits = !!t.splits && t.splits.length > 0;
+
               return (
                 <React.Fragment key={t.id}>
-                  <tr className="border-t border-zinc-200 align-top">
-                    <td className="p-3 whitespace-nowrap">{t.date}</td>
-                    <td className="p-3">
+                  <tr className={`align-top border-t border-zinc-200 ${idx % 2 === 0 ? "bg-white" : "bg-zinc-50/60"}`}>
+                    <td className="p-5 whitespace-nowrap">{t.date}</td>
+                    <td className="p-5">
                       <div className="font-medium">{t.description}</div>
-                      <div className="text-xs text-zinc-500">
+                      <div className="text-xs text-zinc-500 mt-1">
                         {t.counterparty || ""} {t.movementId ? `· ${t.movementId}` : ""}
                       </div>
                     </td>
-                    <td className={`p-3 text-right tabular-nums ${isIncome ? "text-emerald-700" : "text-rose-700"}`}>
+                    <td className={`p-5 text-right tabular-nums font-semibold ${isIncome ? "text-emerald-700" : "text-rose-700"}`}>
                       {t.amount.toFixed(2)}
                     </td>
 
                     {/* Catégorie */}
-                    <td className="p-3">
+                    <td className="p-5">
                       {!isIncome ? (
                         hasSplits ? (
                           <div className="text-xs text-zinc-600">Opération éclatée ({t.splits!.length} lignes)</div>
                         ) : (
-                          <select className="select" value={t.category || ""} onChange={e => setExpenseCat(t.id, e.target.value)}>
+                          <select
+                            className="select"
+                            value={t.category || ""}
+                            onChange={e => setExpenseCat(t.id, e.target.value)}
+                          >
                             <option value="">— Choisir —</option>
                             {Object.keys(categories).map(cat => (
                               <option key={cat} value={cat}>{cat}</option>
@@ -158,24 +180,41 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
                       ) : (
                         <div className="space-y-2">
                           <label className="flex items-center gap-2 text-xs text-zinc-600">
-                            <input type="checkbox" checked={!!t.isRefund} onChange={e => toggleRefund(t.id, e.target.checked)} />
+                            <input
+                              type="checkbox"
+                              checked={!!t.isRefund}
+                              onChange={e => toggleRefund(t.id, e.target.checked)}
+                            />
                             Remboursement ?
                           </label>
                           {t.isRefund ? (
                             <>
-                              <select className="select" value={t.refundCategory || ""} onChange={e => setRefundCat(t.id, e.target.value)}>
+                              <select
+                                className="select"
+                                value={t.refundCategory || ""}
+                                onChange={e => setRefundCat(t.id, e.target.value)}
+                              >
                                 <option value="">— Catégorie dépense —</option>
                                 {Object.keys(categories).map(cat => (
                                   <option key={cat} value={cat}>{cat}</option>
                                 ))}
                               </select>
-                              <select className="select" value={t.refundSubcategory || ""} onChange={e => setRefundSub(t.id, e.target.value)} disabled={!t.refundCategory}>
+                              <select
+                                className="select"
+                                value={t.refundSubcategory || ""}
+                                onChange={e => setRefundSub(t.id, e.target.value)}
+                                disabled={!t.refundCategory}
+                              >
                                 <option value="">— Sous-catégorie —</option>
                                 {refundSubs.map(sc => <option key={sc} value={sc}>{sc}</option>)}
                               </select>
                             </>
                           ) : (
-                            <select className="select" value={t.category || ""} onChange={e => setIncomeCat(t.id, e.target.value)}>
+                            <select
+                              className="select"
+                              value={t.category || ""}
+                              onChange={e => setIncomeCat(t.id, e.target.value)}
+                            >
                               <option value="">— Catégorie de revenus —</option>
                               {incomes.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                             </select>
@@ -185,7 +224,7 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
                     </td>
 
                     {/* Sous-catégorie */}
-                    <td className="p-3">
+                    <td className="p-5">
                       {!isIncome ? (
                         hasSplits ? (
                           <div className="text-xs text-zinc-600">—</div>
@@ -206,30 +245,43 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
                     </td>
 
                     {/* Actions */}
-                    <td className="p-3">
+                    <td className="p-5">
                       {!isIncome && (
                         <button className="btn-ghost" onClick={() => openSplit(t)}>Éclater</button>
                       )}
                       {hasSplits && !isIncome && (
-                        <div className="mt-2 text-xs text-zinc-600 space-y-1">
+                        <div className="mt-3 text-xs text-zinc-600 space-y-1">
                           {t.splits!.map(s => (
-                            <div key={s.id}>• {s.category}{s.subcategory ? ` / ${s.subcategory}` : ""} — {s.amount.toFixed(2)} €</div>
+                            <div key={s.id}>• <span className="font-medium">{s.category}</span>{s.subcategory ? ` / ${s.subcategory}` : ""} — {s.amount.toFixed(2)} €</div>
                           ))}
                         </div>
                       )}
                     </td>
                   </tr>
 
+                  {/* Ligne d'édition des splits */}
                   {editingSplitId === t.id && (
                     <tr className="border-t border-zinc-200">
-                      <td colSpan={6} className="p-3">
-                        <SplitEditor tx={t} onCancel={() => setEditingSplitId(null)} onSave={(splits) => saveSplit(t.id, splits)} />
+                      <td colSpan={6} className="p-5 bg-zinc-50">
+                        <SplitEditor
+                          tx={t}
+                          onCancel={() => setEditingSplitId(null)}
+                          onSave={(splits) => saveSplit(t.id, splits)}
+                        />
                       </td>
                     </tr>
                   )}
                 </React.Fragment>
               );
             })}
+
+            {filtered.length === 0 && (
+              <tr className="border-t border-zinc-200">
+                <td className="p-5 text-center text-zinc-600" colSpan={6}>
+                  Aucune transaction ne correspond au filtre.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
