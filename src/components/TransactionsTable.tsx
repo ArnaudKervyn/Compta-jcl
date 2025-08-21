@@ -139,7 +139,7 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
               <th className="text-left p-5">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-zinc-200">
             {filtered.map((t, idx) => {
               const isIncome = t.amount > 0.000001;
               const expenseSubs = t.category ? (categories[t.category] || []) : [];
@@ -148,7 +148,7 @@ export default function TransactionsTable({ transactions, onUpdate }: Props) {
 
               return (
                 <React.Fragment key={t.id}>
-                  <tr className={`align-top border-t border-zinc-200 ${idx % 2 === 0 ? "bg-white" : "bg-zinc-50/60"}`}>
+                  <tr className={`align-top ${idx % 2 === 0 ? "bg-white" : "bg-zinc-50/60"}`}>
                     <td className="p-5 whitespace-nowrap">{t.date}</td>
                     <td className="p-5">
                       <div className="font-medium">{t.description}</div>
